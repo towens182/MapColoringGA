@@ -9,7 +9,13 @@ Map::Map()
 		gene += std::to_string(temp);
 	}
 
-	fitness = 0;
+	fitness = 100;
+}
+
+Map::Map(std::string g)
+{
+	gene = g;
+	fitness = 100;
 }
 
 void Map::setFitness(int v)
