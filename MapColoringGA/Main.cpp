@@ -2,11 +2,27 @@
 //using a genetic algorithm
 //Tyler Owens
 
+#include <iostream>
+#include "Map.h"
+using namespace std;
 
+void initPopulation(Map * individuals[]);
+void delPopulation(Map * individuals[]);
+bool foundOptimization(Map * individuals[]);
+void calculateFitness(Map * individuals[], Map * parents[], int incidentMatrix[][50]);
+void chooseParents(Map * individuals[], Map * parents[]);
 
+const int SIZE = 6; //Must be even
 
 int main()
 {
+	srand(time(NULL));
+	
+	int generations = 0;
+
+	Map * individuals[SIZE];
+	Map * parents[SIZE / 2];
+
 	int incidentMatrix[50][50] = 
 	{
 		{ 0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0 },
@@ -61,7 +77,84 @@ int main()
 		{ 0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0 }
 	};
 
+	initPopulation(individuals);
+	calculateFitness(individuals, parents, incidentMatrix);
+
+	//while (!foundOptimization) 
+	//{
+		generations++;
+
+		//Print out population
+		for (int i = 0; i < SIZE; i++)
+		{
+			cout << individuals[i]->gene << " F: " << individuals[i]->fitness<< endl;
+		}
+
+		
+		
+
+	//}
 
 
+
+	delPopulation(individuals); //clean memory
+	
+
+	cin.get();
+	cin.get();
 	return 0;
+}
+
+void initPopulation(Map * individuals[])
+{
+	for (int i = 0; i < SIZE; i++)
+	{
+		individuals[i] = new Map();
+	}
+}
+
+void delPopulation(Map * individuals[])
+{
+	for (int i = 0; i < SIZE; i++)
+	{
+		delete individuals[i];
+	}
+}
+
+bool foundOptimization(Map * individuals[])
+{
+	for (int i = 0; i < SIZE; i++)
+	{
+		if (individuals[i]->fitness == 0)
+		{
+			//print out info
+			//cout << 
+			return true;
+		}
+	}
+	return false;
+}
+
+void calculateFitness(Map * individuals[], Map * parents[], int incidentMatrix[][50])
+{
+	for (int i = 0; i < SIZE; i++)
+	{
+		for (int j = 0; j < 50; j++)
+		{
+			for (int k = 0; k < 50; k++)
+			{
+				if (incidentMatrix[j][k] == 1 && individuals[i]->gene.at(j) == individuals[i]->gene.at(k))
+				{
+					individuals[i]->fitness++;
+				}
+			}
+		}
+	}
+
+}
+
+void chooseParents(Map * individuals[], Map * parents[])
+{
+
+
 }
