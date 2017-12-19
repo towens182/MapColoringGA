@@ -4,14 +4,8 @@ class Map {
 
 	public:
 		Map();
-		Map(std::string);
-		void setFitness(int v);
-		std::string gene; //Alphabetical representation of each state by color
-		int fitness; //Number of violations. 0 = optimal
+		Map(std::string); //Constructor for the child
 
-	private:
-	
-	
-
-
+		int fitness;	//Number of violations. 0 = optimal
+		int gene[50];
 };

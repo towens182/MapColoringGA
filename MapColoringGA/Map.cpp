@@ -2,33 +2,22 @@
 
 Map::Map()
 {
+	int temp = 0;
 	for (int i = 0; i < 50; i++)
 	{
-		int temp = rand() % 4;
+		temp = rand() % 4;
 
-		gene += std::to_string(temp);
+		gene[i] = temp;
 	}
 
-	fitness = 100;
+	fitness = 0;
 }
 
 Map::Map(std::string g)
 {
-	gene = g;
-	fitness = 100;
+	for (int i = 0; i < 50; i++)
+	{
+		gene[i] = 5; //Just fill gene with 5 to make easier for testing
+	}
+	fitness = 0;
 }
-
-void Map::setFitness(int v)
-{
-	fitness = v;
-}
-
-//std::string Map::getGene()
-//{
-//	return gene;
-//}
-//
-//int Map::getFitness()
-//{
-//	return fitness;
-//}

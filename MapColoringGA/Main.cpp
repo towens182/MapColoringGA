@@ -14,8 +14,9 @@ void sortParents(Map * parents[]);
 void chooseParentsElite(Map * individuals[], Map * parents[]);
 void chooseParentsRandom(Map * individuals[], Map * parents[]);
 Map * crossover(Map * parent1, Map * parent2);
+Map * mutation(Map * child);
 
-const int SIZE = 50; //Size of individuals in population
+const int SIZE = 100; //Size of individuals in population
 
 int main()
 {
@@ -23,7 +24,7 @@ int main()
 	
 	int generations = 0;
 
-	Map * individuals[SIZE];
+	Map * individuals[SIZE];	
 	Map * parents[SIZE];
 
 	int incidentMatrix[50][50] = 
@@ -81,23 +82,28 @@ int main()
 	};
 
 	initPopulation(individuals, parents);
-	
+	calculateFitness(individuals, incidentMatrix);
+
 	while (!foundOptimization(individuals)) 
 	{
 		generations++;
-		calculateFitness(individuals, incidentMatrix);
 		chooseParentsElite(individuals, parents);
+		//chooseParentsRandom(individuals, parents);
 		calculateFitness(individuals, incidentMatrix);
 
 		//Print out population
-		for (int i = 0; i < SIZE; i++)
+		/*for (int i = 0; i < SIZE; i++)
 		{
-			cout << individuals[i]->gene << " F: " << individuals[i]->fitness<< endl;
-		}
+			for (int j = 0; j < 50; j++) 
+			{
+				cout << individuals[i]->gene[j];
+			}
+			cout << " F: " << individuals[i]->fitness << endl;
+		}*/
 	}
 
 	cout << "Generations: " << generations;
-	delPopulation(individuals, parents); //clean memory
+	delPopulation(individuals, parents); //Free memory
 	
 	cin.get();
 	cin.get();
@@ -122,14 +128,20 @@ void delPopulation(Map * individuals[], Map * parents[])
 	}
 }
 
+//Check for 0 fitness
 bool foundOptimization(Map * individuals[])
 {
 	for (int i = 0; i < SIZE; i++)
 	{
 		if (individuals[i]->fitness == 0)
 		{
-			cout << "Optimal Solution found:/n"
-				 << individuals[i]->gene << " F: " << individuals[i]->fitness 
+			cout << "Optimal Solution found: " << endl;
+			for (int j = 0; j < 50; j++) 
+			{
+				
+				cout << individuals[i]->gene[j];
+			}
+			cout << " F: " << individuals[i]->fitness
 				 << endl;
 			//print out time
 			return true;
@@ -138,6 +150,7 @@ bool foundOptimization(Map * individuals[])
 	return false;
 }
 
+//Calculate violations for each individual
 void calculateFitness(Map * individuals[], int incidentMatrix[][50])
 {
 	for (int i = 0; i < SIZE; i++)
@@ -146,7 +159,7 @@ void calculateFitness(Map * individuals[], int incidentMatrix[][50])
 		{
 			for (int k = 0; k < 50; k++)
 			{
-				if (incidentMatrix[j][k] == 1 && individuals[i]->gene.at(j) == individuals[i]->gene.at(k))
+				if (incidentMatrix[j][k] == 1 && (individuals[i]->gene[j] == individuals[i]->gene[k]))
 				{
 					individuals[i]->fitness++;
 				}
@@ -156,6 +169,7 @@ void calculateFitness(Map * individuals[], int incidentMatrix[][50])
 
 }
 
+//Sort fitness from low to high to choose elite parents easier
 void sortParents(Map * parents[])
 {
 	int j;
@@ -178,6 +192,7 @@ void chooseParentsElite(Map * individuals[], Map * parents[])
 {
 	for (int i = 0; i < SIZE; i++)
 	{
+		if (parents[i] == NULL) { delete parents[i]; }
 		parents[i] = individuals[i];	//copy poulation to parent generation
 	}
 
@@ -188,13 +203,15 @@ void chooseParentsElite(Map * individuals[], Map * parents[])
 		Map * parent1 = NULL;
 		Map * parent2 = NULL;
 		Map * child = NULL;
+
+
 		while (parent1 == parent2)				 //Choose top two elite parents at random
 		{									     //Make sure they are different
 			parent1 = parents[rand() % (SIZE / 2)];
 			parent2 = parents[rand() % (SIZE / 2)];
 		}
 		child = crossover(parent1, parent2);
-		//Mutation
+		child = mutation(child);
 		individuals[j] = child;
 	}
 }
@@ -203,6 +220,7 @@ void chooseParentsRandom(Map * individuals[], Map * parents[])
 {
 	for (int i = 0; i < SIZE; i++)
 	{
+		delete parents[i];
 		parents[i] = individuals[i];		//copy population to parent population
 	}
 
@@ -212,29 +230,54 @@ void chooseParentsRandom(Map * individuals[], Map * parents[])
 		Map * parent2 = NULL;
 		Map * child = NULL;
 
+		parent1 = parents[rand() % (SIZE)];
+		parent2 = parents[rand() % (SIZE)];
+
 		while (parent1 == parent2)				 //Choose top two parents at random
 		{									     //Make sure they are different
 			parent1 = parents[rand() % (SIZE)];
 			parent2 = parents[rand() % (SIZE)];
 		}
 		child = crossover(parent1, parent2);
-		//Mutation
+		child = mutation(child);
 		individuals[j] = child;
 	}
+
 }
 
 Map * crossover(Map * parent1, Map * parent2)
 {
 	int crosspoint = rand() % 50;
+
+	Map * child = new Map("child");
 	
-	if (crosspoint == 0)
+	for (int i = 0; i < crosspoint; i++)
 	{
-		Map * child = new Map((parent1->gene.substr(0) + parent2->gene.substr(crosspoint, 49)));
-		return child;
+		child->gene[i] = parent1->gene[i];
 	}
-	else 
+	
+	for (int j = crosspoint; j < 50; j++)
 	{
-		Map * child = new Map((parent1->gene.substr(0, crosspoint) + parent2->gene.substr(crosspoint, 49)));
-		return child;
+		child->gene[j] = parent2->gene[j];
 	}
+
+	return child;
+}
+
+//Randomly change one chromosome at a 1% chance
+Map * mutation(Map * child)
+{
+	int prob = rand() % 100;
+	int mutatedBit = rand() % 50;
+	int newColor = rand() % 4;
+	if (prob == 1)
+	{
+		while (child->gene[mutatedBit] == newColor)
+		{
+			newColor = rand() % 4;
+		}
+
+		child->gene[mutatedBit] = newColor;
+	}
+	return child;
 }
