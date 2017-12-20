@@ -81,6 +81,7 @@ int main()
 		{ 0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0 }
 	};
 
+	clock_t t = clock();
 	initPopulation(individuals, parents);
 	calculateFitness(individuals, incidentMatrix);
 
@@ -102,7 +103,9 @@ int main()
 		}*/
 	}
 
-	cout << "Generations: " << generations;
+	cout << "Generations: " << generations << endl;
+	t = clock() - t;
+	printf ("Time: %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
 	delPopulation(individuals, parents); //Free memory
 	
 	cin.get();
@@ -188,6 +191,7 @@ void sortParents(Map * parents[])
 	}
 }
 
+//Choose a random parent with top half fitness
 void chooseParentsElite(Map * individuals[], Map * parents[])
 {
 	for (int i = 0; i < SIZE; i++)
@@ -216,6 +220,7 @@ void chooseParentsElite(Map * individuals[], Map * parents[])
 	}
 }
 
+//Choose each parent by choosing the fittest of two random individuals
 void chooseParentsRandom(Map * individuals[], Map * parents[])
 {
 	for (int i = 0; i < SIZE; i++)
@@ -228,16 +233,36 @@ void chooseParentsRandom(Map * individuals[], Map * parents[])
 	{
 		Map * parent1 = NULL;
 		Map * parent2 = NULL;
+		Map * temp1 = NULL;
+		Map * temp2 = NULL;
 		Map * child = NULL;
 
-		parent1 = parents[rand() % (SIZE)];
-		parent2 = parents[rand() % (SIZE)];
+		temp1 = parents[rand() % (SIZE)];
+		temp2 = parents[rand() % (SIZE)];
 
-		while (parent1 == parent2)				 //Choose top two parents at random
-		{									     //Make sure they are different
-			parent1 = parents[rand() % (SIZE)];
-			parent2 = parents[rand() % (SIZE)];
+		while (temp1 == temp2)			//Make sure parents are different
+		{									     
+			temp1 = parents[rand() % (SIZE)];
+			temp2 = parents[rand() % (SIZE)];
 		}
+
+		if (temp1->fitness < temp2->fitness)
+		{ 
+			parent1 = temp1;
+		}
+		else
+		{
+			parent1 = temp2;
+		}
+
+		temp1 = parents[rand() % (SIZE)];
+
+		while (temp1 == parent1)	//Make sure parents are different
+		{
+			temp1 = parents[rand() % (SIZE)];
+		}
+		parent2 = temp1;
+
 		child = crossover(parent1, parent2);
 		child = mutation(child);
 		individuals[j] = child;
