@@ -88,8 +88,8 @@ int main()
 	while (!foundOptimization(individuals)) 
 	{
 		generations++;
-		chooseParentsElite(individuals, parents);
-		//chooseParentsRandom(individuals, parents);
+		//chooseParentsElite(individuals, parents);			//Change Parent selection
+		chooseParentsRandom(individuals, parents);			//methods here
 		calculateFitness(individuals, incidentMatrix);
 
 		//Print out population
@@ -105,7 +105,7 @@ int main()
 
 	cout << "Generations: " << generations << endl;
 	t = clock() - t;
-	printf ("Time: %d clicks (%f seconds).\n", t, ((float)t) / CLOCKS_PER_SEC);
+	printf ("Time: (%f seconds).\n", ((float)t) / CLOCKS_PER_SEC);
 	delPopulation(individuals, parents); //Free memory
 	
 	cin.get();
